@@ -1,0 +1,44 @@
+# DOMCS-EEG Main Training Config
+# Reproduces: EER=3.75%+-0.20%, AUC=0.9928+-0.0008
+# Published in: IEEE Trans. Inf. Forensics Secur. (T-IFS), 2026
+
+model:
+  n_channels: 64
+  emb_dim: 128
+  backbone_channels: [64, 128, 256]
+  kernel_sizes: [7, 5, 3]
+
+training:
+  epochs: 60
+  batch_size: 256
+  lr: 0.0003          # 3e-4
+  weight_decay: 0.0001  # 1e-4
+  optimizer: adam
+  early_stopping_patience: 10
+  seeds: [1, 2, 3, 4, 5]
+
+losses:
+  arcface: {scale: 30.0, margin: 0.5}
+  supcon:  {temperature: 0.07, weight: 0.5}
+  state:   {weight: 0.5}
+  orth:    {weight: 0.1}
+
+protocol:
+  type: b2t
+  train_runs: [R01, R02]
+  test_runs: [R03, R04, R05, R06, R07, R08, R09, R10, R11, R12, R13, R14]
+  enrollment_k: 3
+  kmeans_restarts: 10
+
+dataset:
+  name: EEGMMIDB
+  n_subjects: 109
+  n_channels: 64
+  fs: 128
+  window_sec: 2.0
+  step_sec: 1.0
+
+hardware:
+  gpu: NVIDIA A100-SXM4-80GB
+  framework: PyTorch 2.x
+  cuda: "12"

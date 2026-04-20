@@ -1,0 +1,22 @@
+
+\begin{table}[t]
+\centering
+\caption{Comparison of metric learning objectives under the B2T protocol
+(mean\,$\pm$\,std over 5 independent seeds).
+All methods use the identical CNN backbone and K-means
+prototype enrollment (K\,=\,3). EER: lower is better;
+AUC: higher is better.}
+\label{tab:baseline_ml}
+\begin{tabular}{lcc}
+\toprule
+Method & EER (\%) $\downarrow$ & AUC $\uparrow$ \\\\
+\midrule
+        CNN + Softmax (no metric learning) & $1.06±0.06$ & $0.9992±0.0001$ \\
+        CNN + ArcFace & $3.94±0.31$ & $0.9921±0.0010$ \\
+        CNN + ArcFace + SupCon (no orth) & $4.12±0.10$ & $0.9908±0.0009$ \\
+        CNN + Triplet & $1.02±0.08$ & $0.9992±0.0001$ \\
+        CNN + SupCon (standalone) & $2.17±0.07$ & $0.9976±0.0002$ \\
+        \textbf{DOMCS-EEG (ours)} & $\textbf{3.75±0.20}$ & $\textbf{0.9928±0.0008}$ \\
+\bottomrule
+\end{tabular}
+\end{table}

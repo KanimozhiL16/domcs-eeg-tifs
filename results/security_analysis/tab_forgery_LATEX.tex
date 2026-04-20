@@ -1,0 +1,20 @@
+
+\begin{table}[t]
+\centering
+\caption{Random vs.\ skilled forgery EER (\%) under the B2T protocol.
+Skilled forgery: impostor submits resting-state EEG,
+matching the enrollment cognitive state.
+$\Delta$ = Skilled $-$ Random EER;
+smaller $|\Delta|$ indicates greater robustness to skilled attacks.}
+\label{tab:forgery}
+\begin{tabular}{lccc}
+\toprule
+Method & Random EER (\%) & Skilled EER (\%) & $\Delta$ (pp) \\\\
+\midrule
+        CNN + ArcFace (no decorr.) & $3.65$ & $2.96$ & $-0.69$ \\
+        CNN + ArcFace + L_orth (decorr. only) & $3.62$ & $2.94$ & $-0.68$ \\
+        \textbf{DOMCS-EEG (ArcFace + SupCon + L_orth)} & $\textbf{4.17}$ & $\textbf{3.41}$ & $\textbf{-0.76}$ \\
+
+\bottomrule
+\end{tabular}
+\end{table}
