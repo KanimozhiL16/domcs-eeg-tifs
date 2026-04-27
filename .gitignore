@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.npy
+*.npz
+.ipynb_checkpoints/
+data/
+EEGMMIDB/
+.DS_Store
+.venv/
+outputs/
+runs/
+wandb/
+mlruns/
+runtime_store/embeddings/*.npz
