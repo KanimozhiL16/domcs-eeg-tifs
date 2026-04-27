@@ -1,4 +1,4 @@
-﻿"""
+"""
 DOMCS-EEG Core Framework - 01_core_framework.py
 =================================================
 Single source of truth for ALL experiments.
