@@ -1,4 +1,0 @@
-Method,Random_EER_%,Random_AUC,Skilled_EER_%,Skilled_AUC,Delta_pp,Ratio_Skilled/Random
-E1-ArcFace,3.65,0.9925,2.96,0.9936,-0.69,0.811
-E2-ArcFace+Orth,3.62,0.9926,2.94,0.9937,-0.68,0.812
-E3-DOMCS-EEG,4.17,0.9918,3.41,0.9938,-0.76,0.818

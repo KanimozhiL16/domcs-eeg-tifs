@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOMCS-EEG Experience</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Compact Research Software</p>
+        <h1>Let People Experience EEG Biometrics, Not Just Read About It</h1>
+        <p class="hero-text">
+          DOMCS-EEG is presented here as a compact, explorable system: protocol realism,
+          cross-task verification, cognitive-state disentanglement, and deployment-facing
+          performance in one interface.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#results">See Results</a>
+          <a class="button secondary" href="#product">See Product Path</a>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="metric-tower">
+          <div class="metric-card accent">
+            <span class="metric-label">B2T EER</span>
+            <span class="metric-value">3.75%</span>
+            <span class="metric-note">Cross-task biometric error rate</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">AUC</span>
+            <span class="metric-value">0.9928</span>
+            <span class="metric-note">Genuine vs impostor separation</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">CRR</span>
+            <span class="metric-value">86.95%</span>
+            <span class="metric-note">109 subjects, 12 task runs</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Inference</span>
+            <span class="metric-value">0.666 ms</span>
+            <span class="metric-note">305,666 parameters</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section story-grid" id="results">
+        <article class="panel">
+          <p class="section-tag">Why It Matters</p>
+          <h2>Protocol Realism Changes the Story</h2>
+          <p>
+            Random splits understate difficulty. DOMCS-EEG evaluates the stronger and more realistic
+            baseline-to-task protocol, exposing the true cost of cognitive-state shift in EEG biometric systems.
+          </p>
+          <div class="protocol-bars" id="protocol-bars"></div>
+        </article>
+
+        <article class="panel">
+          <p class="section-tag">Architecture</p>
+          <h2>Identity and Cognitive State Are Explicitly Separated</h2>
+          <div class="architecture-flow">
+            <div>64-channel EEG<br><span>2 s window, 128 Hz</span></div>
+            <div>Conv1D Backbone<br><span>64 -> 128 -> 256</span></div>
+            <div>Identity Head<br><span>ArcFace-ready embedding</span></div>
+            <div>State Head<br><span>Disentanglement supervision</span></div>
+          </div>
+          <p class="small-text">
+            Shared feature extractor, dual projection heads, and auxiliary state supervision let the model retain identity cues while reducing task-specific leakage.
+          </p>
+        </article>
+      </section>
+
+      <section class="section panel experience-panel">
+        <div class="section-header">
+          <div>
+            <p class="section-tag">Interactive Experience</p>
+            <h2>Explore What the Model Learns</h2>
+          </div>
+          <div class="tab-row" id="gallery-tabs"></div>
+        </div>
+        <div class="gallery-stage">
+          <img id="gallery-image" src="../figures/FIG_05_ROC_DET_60ep.png" alt="DOMCS-EEG result figure">
+          <div class="gallery-copy">
+            <h3 id="gallery-title">ROC and DET</h3>
+            <p id="gallery-description">
+              Verification behaviour under the realistic evaluation setting. The operating point near EER summarizes the balance between false acceptance and false rejection.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section dual-panel">
+        <article class="panel">
+          <p class="section-tag">Seed Robustness</p>
+          <h2>Results Hold Across Runs</h2>
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Seed</th>
+                <th>EER%</th>
+                <th>AUC</th>
+                <th>CRR%</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </article>
+
+        <article class="panel">
+          <p class="section-tag">Experience Control</p>
+          <h2>Switch the Story Focus</h2>
+          <div class="focus-buttons">
+            <button data-focus="science" class="focus-button active">Scientific Impact</button>
+            <button data-focus="deployment" class="focus-button">Deployment Readiness</button>
+            <button data-focus="demo" class="focus-button">Demo Narrative</button>
+          </div>
+          <div class="focus-copy" id="focus-copy"></div>
+        </article>
+      </section>
+
+      <section class="section panel" id="product">
+        <p class="section-tag">Product Path</p>
+        <h2>How This Becomes a Usable System</h2>
+        <div class="product-grid">
+          <div>
+            <h3>Lab Demo</h3>
+            <p>Live identity verification kiosk with EEG acquisition, session-aware enrollment, and confidence visualisation.</p>
+          </div>
+          <div>
+            <h3>Clinical / Secure Access</h3>
+            <p>Decision-support biometric module for high-assurance operator authentication where cognitive drift matters.</p>
+          </div>
+          <div>
+            <h3>Software Stack</h3>
+            <p>FastAPI inference endpoint, checkpoint registry, subject enrollment API, and browser dashboard using this interface.</p>
+          </div>
+          <div>
+            <h3>Next Q1 Upgrade</h3>
+            <p>Add open-set verification, calibration curves, external-session validation, and adversarial robustness stress testing.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

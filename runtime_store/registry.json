@@ -1,0 +1,9 @@
+{
+  "users": {
+    "test_1": {
+      "num_windows": 60,
+      "embedding_dim": 128,
+      "storage_path": "runtime_store/embeddings/test_1.npz"
+    }
+  }
+}

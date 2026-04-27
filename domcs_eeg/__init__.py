@@ -1,1 +1,3 @@
-"""DOMCS-EEG: Domain-Orthogonal Multi-Component Disentanglement for Cross-State EEG Biometric Verification."""
+from .model import DOMCSEEG
+
+__version__ = '1.0.0'
