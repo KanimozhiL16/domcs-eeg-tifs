@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: "DOMCS-EEG: Domain-Orthogonal Multi-Component Supervised EEG for Robust Cross-Task Biometric Verification"
+message: "If you use this code, please cite the associated IEEE TIFS manuscript."
+type: software
+authors:
+  - family-names: Kanimozhi
+    given-names: L.
+  - family-names: Shridevi
+    given-names: S.
+year: 2026
+repository-code: "https://github.com/KanimozhiL16/domcs-eeg-tifs"
+keywords:
+  - EEG biometrics
+  - biometric authentication
+  - ArcFace
+  - supervised contrastive learning
+  - cross-task verification
+  - baseline-to-task protocol

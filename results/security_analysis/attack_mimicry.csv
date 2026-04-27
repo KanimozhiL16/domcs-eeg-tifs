@@ -1,7 +1,0 @@
-Model,Attack,Steps,EER_%,AUC
-E1-ArcFace,Black-box,50,7.14,0.9773
-E1-ArcFace,White-box FGSM,20,0.0,1.0
-E2-ArcFace+Orth,Black-box,50,6.83,0.9777
-E2-ArcFace+Orth,White-box FGSM,20,0.0,1.0
-E3-DOMCS-EEG,Black-box,50,5.06,0.9904
-E3-DOMCS-EEG,White-box FGSM,20,0.0,1.0

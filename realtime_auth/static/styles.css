@@ -1,0 +1,155 @@
+:root {
+  --bg: #08111b;
+  --panel: #0f1c2b;
+  --line: #223548;
+  --ink: #eff6ff;
+  --muted: #9fb2c6;
+  --accent: #44d1a8;
+  --danger: #ff6b6b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #13253a, var(--bg) 56%);
+  color: var(--ink);
+}
+
+.shell {
+  width: min(1180px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.hero,
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.hero {
+  grid-template-columns: 1.5fr 0.8fr;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.eyebrow {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 10px;
+}
+
+.subtext {
+  color: var(--muted);
+}
+
+.grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel,
+.status-card {
+  background: rgba(15, 28, 43, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.nested {
+  margin-bottom: 0;
+}
+
+.hint {
+  color: var(--muted);
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+input,
+button,
+pre {
+  border-radius: 12px;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: #09131d;
+  color: var(--ink);
+}
+
+button {
+  padding: 12px 14px;
+  border: none;
+  background: var(--accent);
+  color: #05211b;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.06);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.users-list {
+  display: grid;
+  gap: 10px;
+}
+
+.user-chip {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #09131d;
+}
+
+pre {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: #09131d;
+  color: #dce9f7;
+  overflow: auto;
+  min-height: 180px;
+}
+
+.accept {
+  color: var(--accent);
+}
+
+.reject {
+  color: var(--danger);
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

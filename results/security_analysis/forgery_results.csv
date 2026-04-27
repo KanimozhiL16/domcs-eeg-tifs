@@ -1,4 +1,0 @@
-Method,Random_EER,Random_AUC,Skilled_EER,Skilled_AUC,Forgery_Delta
-CNN + ArcFace (no decorr.),3.65,0.9925,2.96,0.9936,-0.69
-CNN + ArcFace + L_orth (decorr. only),3.62,0.9926,2.94,0.9937,-0.68
-DOMCS-EEG (ArcFace + SupCon + L_orth),4.17,0.9918,3.41,0.9938,-0.76
