@@ -1,58 +1,117 @@
 # DOMCS-EEG
 
-Paper-aligned implementation for **Domain-Orthogonal Multi-Component Supervised EEG (DOMCS-EEG)**, an EEG biometric verification framework evaluated under a strict Baseline-to-Task (B2T) protocol.
+Reproducibility package for **Domain-Orthogonal Multi-Component Supervised EEG (DOMCS-EEG)**, an EEG biometric verification framework evaluated under a strict Baseline-to-Task (B2T) protocol.
 
-This repository is aligned with the manuscript:
+This repository is the code URL cited in the final v11 IEEE TIFS manuscript:
 
-**DOMCS-EEG: Domain-Orthogonal Multi-Component Supervised EEG for Robust Cross-Task Biometric Verification**  
-Target venue: IEEE Transactions on Information Forensics and Security (TIFS), 2026.
+```text
+DOMCS_EEG_TIFS_20260428_FINAL_v11_FULLY_CONSISTENT_MAIN.pdf
+```
 
-## Paper-Locked Headline Results
+Cited archive DOI:
 
-The following values are locked to the final manuscript package `DOMCS_EEG_TIFS_20260427_FINAL_v7_COMPLETE_MAIN.pdf`.
+```text
+https://doi.org/10.5281/zenodo.19666452
+```
 
-| Setting | EER (%) | AUC | CRR (%) | Source |
-|---|---:|---:|---:|---|
-| DOMCS-EEG, B2T, 5 seeds | 3.75 +/- 0.20 | 0.9928 +/- 0.0008 | 86.95 +/- 0.40 | `experiments/results/TABLE_IV_main_results.csv` |
-| Random split | 1.54 | 0.9986 | - | manuscript Table V |
-| Hybrid protocol | 2.71 | 0.9951 | - | manuscript Table V |
-| ArcFace-only ablation (E1) | 3.94 +/- 0.31 | - | - | manuscript Table VI |
-| Full DOMCS-EEG ablation (E5) | 3.86 +/- 0.13 | - | - | manuscript Table VI |
+## What This Repository Contains
 
-Primary protocol:
+| Area | Contents |
+|---|---|
+| Main model | DOMCS-EEG 1D CNN embedding model with ArcFace, SupCon, state/domain, and orthogonality losses |
+| Main experiment | 60-epoch 5-seed B2T training/evaluation pipeline |
+| Paper tables | Paper-locked Table IV values and result-lock metadata |
+| Raw evidence | Original NVIDIA A100 multi-seed result and independent Apr 28 rerun |
+| Supporting experiments | Baseline, ablation, protocol, security, interpretability, and realtime-authentication assets where included in the repository |
+| Reviewer checks | Verification scripts and audit files for paper/result alignment |
 
-- Dataset: PhysioNet EEG Motor Movement/Imagery Database (EEGMMIDB)
-- Subjects: 109
-- Sampling rate: 128 Hz
-- EEG window: 2 seconds, 1 second step
-- Enrollment: R01-R02 resting-state baseline
-- Verification probes: R03-R14 task-state EEG
-- Gallery: K-means prototypes, K = 3 per subject
-- Metrics: Equal Error Rate (EER), AUC, Correct Recognition Rate (CRR), ROC/DET
+## Primary Paper Result
+
+The v11 manuscript reports the following headline B2T result:
+
+| Source | EER (%) | AUC | CRR (%) |
+|---|---:|---:|---:|
+| Manuscript Table IV | 3.75 +/- 0.20 | 0.9928 +/- 0.0008 | 86.95 +/- 0.40 |
+
+Paper table source:
+
+```text
+experiments/results/TABLE_IV_main_results.csv
+experiments/results/PAPER_RESULTS_LOCK.csv
+```
+
+Raw NVIDIA evidence is preserved separately:
+
+| Evidence | Mean EER (%) | Std EER (%) | Mean AUC | Std AUC | File |
+|---|---:|---:|---:|---:|---|
+| Original Brev/NVIDIA A100 run, 2026-04-06 | 3.76 | 0.21 | 0.9931 | 0.0007 | `results/main_results/original_20260406_multi_seed_summary.csv` |
+| Independent Brev/NVIDIA A100 rerun, 2026-04-28 | 3.82 | 0.29 | 0.9929 | 0.0011 | `results/main_results/rerun_20260428_multi_seed_summary.csv` |
+
+These values are comparable but not bit-identical. GPU training can vary slightly because of CUDA kernels, floating-point ordering, DataLoader behavior, K-means initialization, and library versions. The ethical reproducibility claim is that the code reproduces comparable B2T performance within the reported experimental tolerance.
+
+## Protocol
+
+| Field | Value |
+|---|---|
+| Dataset | PhysioNet EEG Motor Movement/Imagery Database (EEGMMIDB) |
+| Subjects | 109 |
+| Sampling rate | 128 Hz |
+| EEG window | 2 seconds |
+| Step | 1 second |
+| Enrollment | R01-R02 resting-state baseline |
+| Verification probes | R03-R14 task-state EEG |
+| Gallery | K-means prototypes, K = 3 per subject |
+| Metrics | EER, AUC, CRR, ROC/DET |
+| Seeds | 1, 2, 3, 4, 5 |
+
+## Model Configuration
+
+The reviewer-facing configuration is stored at:
+
+```text
+experiments/configs/main_60ep.yaml
+```
+
+Main settings:
+
+```text
+epochs = 60
+batch_size = 256
+learning_rate = 3e-4
+weight_decay = 1e-4
+ArcFace scale = 30.0
+ArcFace margin = 0.5
+SupCon temperature = 0.07
+loss weights = ArcFace 1.0, SupCon 0.5, State 0.5, Orthogonal 0.1
+```
 
 ## Repository Structure
 
 ```text
 domcs_eeg/                 Core model and biometric evaluation utilities
-scripts/                   Training and experiment framework scripts
-experiments/configs/       Paper-locked hyperparameter configuration
+scripts/                   Training, framework, and verification scripts
+experiments/configs/       Paper/reviewer hyperparameter configuration
 experiments/results/       Paper-aligned result tables
+results/main_results/      Raw original and rerun NVIDIA evidence
+results/                   Additional baseline, ablation, security, and protocol results when present
 figures/                   Paper/result figures
-interpretability/          Grad-CAM, Integrated Gradients, occlusion and UMAP figures
+interpretability/          Grad-CAM, Integrated Gradients, occlusion, and UMAP figures
 realtime_auth/             FastAPI-style real-time authentication prototype
-runtime_store/             Portable runtime registry template
-checkpoints/               Seed-1 checkpoint for demo/evaluation
+data/                      Dataset placement instructions
+checkpoints/               Checkpoint manifest and demo/evaluation checkpoint
 ```
 
 ## Installation
 
-```bash
+Windows PowerShell:
+
+```powershell
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-On Linux/macOS:
+Linux/macOS:
 
 ```bash
 python -m venv .venv
@@ -60,39 +119,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Reproducibility
-
-The main locked configuration is:
-
-```text
-experiments/configs/main_60ep.yaml
-```
-
-The paper-aligned result table is:
-
-```text
-experiments/results/TABLE_IV_main_results.csv
-```
-
-For a full rerun, update the dataset path in `scripts/core_framework.py` or adapt it through your local experiment launcher, then run:
-
-```bash
-python scripts/train_60ep.py
-```
-
-The expected 5-seed B2T result is:
-
-```text
-EER = 3.75 +/- 0.20 %
-AUC = 0.9928 +/- 0.0008
-CRR = 86.95 +/- 0.40 %
-```
-
 ## Dataset
 
-Download EEGMMIDB from PhysioNet:
+The dataset is not stored in GitHub. See:
 
-https://physionet.org/content/eegmmidb/1.0.0/
+```text
+data/README.md
+```
 
 Expected preprocessed archive:
 
@@ -100,11 +133,54 @@ Expected preprocessed archive:
 EEGMMIDB_win2s_step1s_fs128.npz
 ```
 
-The repository does not include the full dataset.
+Expected shape:
 
-## Deployment Direction
+```text
+X: (173198, 64, 256) float32
+```
 
-The `realtime_auth/` module provides a practical path for a live EEG biometric demo:
+## Verify Repository Evidence
+
+Run:
+
+```bash
+python scripts/verify_reproducibility.py
+```
+
+This recomputes the summary statistics for:
+
+- manuscript Table IV,
+- original NVIDIA A100 run,
+- independent NVIDIA A100 rerun.
+
+The legacy paper-table lock can also be checked with:
+
+```bash
+python scripts/verify_paper_alignment.py
+```
+
+## Full 60-Epoch Rerun
+
+After placing the preprocessed dataset at the expected path, run:
+
+```bash
+python scripts/train_60ep.py
+```
+
+The script writes a timestamped experiment directory containing:
+
+```text
+multi_seed_summary.csv
+seed_*/summary.json
+seed_*/train_log.csv
+seed_*/model_best.pt
+```
+
+A rerun should be interpreted statistically, not as an exact bitwise equality test.
+
+## Realtime Authentication Direction
+
+The `realtime_auth/` module provides a path for a live EEG biometric demo:
 
 - enroll resting-state EEG windows,
 - compute normalized identity embeddings,
