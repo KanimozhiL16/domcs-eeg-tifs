@@ -1,27 +1,47 @@
 # DOMCS-EEG Main Training Config
-# Reproduces: EER=3.75%+-0.20%, AUC=0.9928+-0.0008
+# Final v11 reproducibility configuration for the 60-epoch B2T experiment.
+# This mirrors scripts/train_60ep.py and the NVIDIA A100 evidence runs.
 
 model:
   n_channels: 64
   emb_dim: 128
+  backbone: conv1d_64_128_256_adaptive_pool
+  embedding_normalization: l2
 
 training:
   epochs: 60
   batch_size: 256
-  lr: 0.001
+  eval_batch_size: 512
+  lr: 0.0003
+  weight_decay: 0.0001
+  optimizer: adam
   seeds: [1, 2, 3, 4, 5]
+  patience: 10
 
 losses:
-  arcface: {scale: 30.0, margin: 0.5}
-  supcon:  {temperature: 0.07, weight: 0.1}
-  state:   {weight: 0.1}
-  orth:    {weight: 0.01}
+  arcface:
+    scale: 30.0
+    margin: 0.5
+    weight: 1.0
+  supcon:
+    temperature: 0.07
+    weight: 0.5
+  state:
+    weight: 0.5
+  orth:
+    weight: 0.1
 
 protocol:
   type: b2t
   train_runs: [R01, R02]
   test_runs: [R03, R04, R05, R06, R07, R08, R09, R10, R11, R12, R13, R14]
   enrollment_k: 3
+  split: train_on_resting_baseline_verify_on_task_runs
+
+metrics:
+  primary: [eer, auc, crr]
+  biometric_backend: kmeans_gallery_prototypes
+  similarity: cosine
 
 dataset:
   name: EEGMMIDB
@@ -30,3 +50,12 @@ dataset:
   fs: 128
   window_sec: 2.0
   step_sec: 1.0
+  expected_npz: EEGMMIDB_win2s_step1s_fs128.npz
+  expected_keys: [X, y, subject_id, session, fs, ch_names]
+  expected_X_shape: [173198, 64, 256]
+
+hardware_evidence:
+  provider: Brev.dev NVIDIA Academic Hardware Grant
+  gpu: NVIDIA A100-SXM4-80GB
+  original_result_utc: 2026-04-06 09:08:26
+  independent_rerun_utc: 2026-04-28 01:52:00
