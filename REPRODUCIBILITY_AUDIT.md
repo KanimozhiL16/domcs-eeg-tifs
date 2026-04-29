@@ -1,13 +1,13 @@
-# DOMCS-EEG v11 Reproducibility Audit
+# DOMCS-EEG Submitted-Paper Reproducibility Audit
 
-This audit documents the relationship between the final v11 manuscript, the GitHub repository, and the NVIDIA A100 implementation evidence.
+This audit documents the relationship between the submitted IEEE TIFS manuscript, the GitHub repository, and the NVIDIA A100 implementation evidence.
 
 ## Scope
 
-Final manuscript package:
+Submitted manuscript package:
 
 ```text
-DOMCS_EEG_TIFS_20260428_FINAL_v11_FULLY_CONSISTENT_MAIN.pdf
+finalDOMCS_EEG_TIFS_Submission.pdf
 ```
 
 Public code URL cited in the manuscript:
@@ -68,7 +68,8 @@ experiments/configs/main_60ep.yaml
 
 | Evidence | Repository File | Original Local/Brev Source |
 |---|---|---|
-| Manuscript Table IV | `experiments/results/TABLE_IV_main_results.csv` | v11 paper table |
+| Submitted paper Table III | `experiments/results/TABLE_III_main_results.csv` | `finalDOMCS_EEG_TIFS_Submission.pdf` |
+| Backward-compatible table alias | `experiments/results/TABLE_IV_main_results.csv` | Same values as submitted Table III |
 | Original NVIDIA raw 60-epoch B2T run | `results/main_results/original_20260406_multi_seed_summary.csv` | `/home/nvidia/24PHD1237/FILES_1/EEGMMIDB/experiments/run_20260406_090214_60EP_FINAL/multi_seed_summary.csv` |
 | Independent NVIDIA rerun | `results/main_results/rerun_20260428_multi_seed_summary.csv` | `/home/nvidia/24PHD1237/FILES_1/DOMCS_EEG_RERUN_20260428/results/run_20260428_015200_60EP_FINAL/multi_seed_summary.csv` |
 
@@ -95,18 +96,18 @@ Independent rerun evidence timestamp:
 
 | Source | Seed Values | Mean EER (%) | Std EER (%) | Mean AUC | Std AUC | Interpretation |
 |---|---|---:|---:|---:|---:|---|
-| Manuscript Table IV | Paper-rounded values | 3.75 | 0.20 | 0.9928 | 0.0008 | Locked manuscript table |
+| Submitted paper Table III | Paper values | 3.76 | 0.21 | 0.9931 | 0.0007 | Locked submitted manuscript table |
 | Original NVIDIA A100 run | Seeds 1-5 | 3.76 | 0.21 | 0.9931 | 0.0007 | Raw implementation evidence |
 | Independent NVIDIA A100 rerun | Seeds 1-5 | 3.82 | 0.29 | 0.9929 | 0.0011 | Reproducibility check |
 
-The raw NVIDIA evidence and the independent rerun are close to the manuscript values, but they are not expected to be bit-identical. CUDA training, DataLoader ordering, K-means initialization, floating-point kernels, and library versions can cause small run-to-run differences even with fixed seeds.
+The raw NVIDIA evidence and the independent rerun are close to the submitted manuscript values, but they are not expected to be bit-identical. CUDA training, DataLoader ordering, K-means initialization, floating-point kernels, and library versions can cause small run-to-run differences even with fixed seeds.
 
 ## Ethical Reporting Position
 
-The repository should not claim that every GPU rerun will exactly reproduce `3.75`, `0.9928`, and `86.95` bit-for-bit. The correct claim is:
+The repository should not claim that every GPU rerun will exactly reproduce the table bit-for-bit. The correct claim is:
 
 ```text
-The repository preserves the final manuscript table and the raw NVIDIA A100 evidence. Independent reruns using the same code, preprocessed EEGMMIDB archive, seeds, protocol, and hyperparameters reproduce comparable B2T performance within the reported experimental tolerance.
+The repository preserves the submitted manuscript Table III and the raw NVIDIA A100 evidence. Independent reruns using the same code, preprocessed EEGMMIDB archive, seeds, protocol, and hyperparameters reproduce comparable B2T performance within the reported experimental tolerance.
 ```
 
 ## Reviewer Commands
