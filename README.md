@@ -2,10 +2,10 @@
 
 Reproducibility package for **Domain-Orthogonal Multi-Component Supervised EEG (DOMCS-EEG)**, an EEG biometric verification framework evaluated under a strict Baseline-to-Task (B2T) protocol.
 
-This repository is the code URL cited in the final v11 IEEE TIFS manuscript:
+This repository is the code URL cited in the submitted IEEE TIFS manuscript:
 
 ```text
-DOMCS_EEG_TIFS_20260428_FINAL_v11_FULLY_CONSISTENT_MAIN.pdf
+finalDOMCS_EEG_TIFS_Submission.pdf
 ```
 
 Cited archive DOI:
@@ -20,25 +20,27 @@ https://doi.org/10.5281/zenodo.19666452
 |---|---|
 | Main model | DOMCS-EEG 1D CNN embedding model with ArcFace, SupCon, state/domain, and orthogonality losses |
 | Main experiment | 60-epoch 5-seed B2T training/evaluation pipeline |
-| Paper tables | Paper-locked Table IV values and result-lock metadata |
+| Paper tables | Submitted-paper Table III values and result-lock metadata |
 | Raw evidence | Original NVIDIA A100 multi-seed result and independent Apr 28 rerun |
 | Supporting experiments | Baseline, ablation, protocol, security, interpretability, and realtime-authentication assets where included in the repository |
 | Reviewer checks | Verification scripts and audit files for paper/result alignment |
 
 ## Primary Paper Result
 
-The v11 manuscript reports the following headline B2T result:
+The submitted manuscript reports the following headline B2T result:
 
 | Source | EER (%) | AUC | CRR (%) |
 |---|---:|---:|---:|
-| Manuscript Table IV | 3.75 +/- 0.20 | 0.9928 +/- 0.0008 | 86.95 +/- 0.40 |
+| Submitted paper Table III | 3.76 +/- 0.21 | 0.9931 +/- 0.0007 | 86.95 +/- 0.40 |
 
 Paper table source:
 
 ```text
-experiments/results/TABLE_IV_main_results.csv
+experiments/results/TABLE_III_main_results.csv
 experiments/results/PAPER_RESULTS_LOCK.csv
 ```
+
+`experiments/results/TABLE_IV_main_results.csv` is retained only as a backward-compatible alias and contains the same submitted-paper values.
 
 Raw NVIDIA evidence is preserved separately:
 
@@ -149,11 +151,11 @@ python scripts/verify_reproducibility.py
 
 This recomputes the summary statistics for:
 
-- manuscript Table IV,
+- submitted paper Table III,
 - original NVIDIA A100 run,
 - independent NVIDIA A100 rerun.
 
-The legacy paper-table lock can also be checked with:
+The submitted paper table lock can also be checked with:
 
 ```bash
 python scripts/verify_paper_alignment.py
