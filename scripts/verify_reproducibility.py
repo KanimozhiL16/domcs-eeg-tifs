@@ -7,16 +7,16 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PAPER_TABLE = ROOT / "experiments" / "results" / "TABLE_IV_main_results.csv"
+PAPER_TABLE = ROOT / "experiments" / "results" / "TABLE_III_main_results.csv"
 ORIGINAL_RAW = ROOT / "results" / "main_results" / "original_20260406_multi_seed_summary.csv"
 RERUN_RAW = ROOT / "results" / "main_results" / "rerun_20260428_multi_seed_summary.csv"
 CONFIG = ROOT / "experiments" / "configs" / "main_60ep.yaml"
 
 EXPECTED_PAPER = {
-    "eer_pct_mean": 3.75,
-    "eer_pct_std": 0.20,
-    "auc_mean": 0.9928,
-    "auc_std": 0.0008,
+    "eer_pct_mean": 3.76,
+    "eer_pct_std": 0.21,
+    "auc_mean": 0.9931,
+    "auc_std": 0.0007,
     "crr_pct_mean": 86.95,
     "crr_pct_std": 0.40,
 }
@@ -75,14 +75,14 @@ def verify_paper_lock() -> None:
         tolerance = 1e-8
         actual = paper[key]
         if not _close(actual, expected, tolerance):
-            raise AssertionError(f"Paper table drifted for {key}: got {actual}, expected {expected}")
+            raise AssertionError(f"Submitted paper table drifted for {key}: got {actual}, expected {expected}")
 
 
 def verify_config() -> None:
     text = CONFIG.read_text(encoding="utf-8")
     missing = [s for s in EXPECTED_CONFIG_SNIPPETS if s not in text]
     if missing:
-        raise AssertionError("Config is missing expected v11 fields: " + ", ".join(missing))
+        raise AssertionError("Config is missing expected submitted-paper fields: " + ", ".join(missing))
 
 
 def verify_raw_ranges() -> None:
@@ -91,10 +91,10 @@ def verify_raw_ranges() -> None:
 
     # These are deliberately tolerance checks, not exact equality checks.
     checks = [
-        ("original EER mean", original["eer_pct_mean"], 3.75, 0.20),
-        ("original AUC mean", original["auc_mean"], 0.9928, 0.0010),
-        ("rerun EER mean", rerun["eer_pct_mean"], 3.75, 0.35),
-        ("rerun AUC mean", rerun["auc_mean"], 0.9928, 0.0015),
+        ("original EER mean", original["eer_pct_mean"], 3.76, 0.05),
+        ("original AUC mean", original["auc_mean"], 0.9931, 0.0002),
+        ("rerun EER mean", rerun["eer_pct_mean"], 3.76, 0.35),
+        ("rerun AUC mean", rerun["auc_mean"], 0.9931, 0.0015),
     ]
     for label, actual, expected, tolerance in checks:
         if not _close(actual, expected, tolerance):
@@ -109,13 +109,13 @@ def main() -> None:
     verify_config()
     verify_raw_ranges()
 
-    print("DOMCS-EEG v11 reproducibility check")
+    print("DOMCS-EEG submitted-paper reproducibility check")
     print("-" * 72)
-    _print_row("Manuscript Table IV", _read_paper_table(PAPER_TABLE))
+    _print_row("Submitted paper Table III", _read_paper_table(PAPER_TABLE))
     _print_row("Original NVIDIA A100", _read_raw_summary(ORIGINAL_RAW))
     _print_row("Independent A100 rerun", _read_raw_summary(RERUN_RAW))
     print("-" * 72)
-    print("OK: paper table, v11 config, original raw evidence, and rerun evidence are consistent within tolerance.")
+    print("OK: submitted paper table, config, original raw evidence, and rerun evidence are consistent within tolerance.")
 
 
 if __name__ == "__main__":
