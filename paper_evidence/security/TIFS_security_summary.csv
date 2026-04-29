@@ -1,0 +1,4 @@
+Method,Random_EER_%,Skilled_EER_%,Delta_pp,Leakage_50pct_EER_%,Noise_10dB_EER_%,Mimicry_WB_EER_%
+E1-ArcFace,3.65,2.96,-0.69,3.5,7.44,0.0
+E2-ArcFace+Orth,3.62,2.94,-0.68,3.46,7.36,0.0
+E3-DOMCS-EEG,4.17,3.41,-0.76,3.96,8.0,0.0
