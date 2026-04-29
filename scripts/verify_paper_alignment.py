@@ -7,18 +7,18 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RESULTS = ROOT / "experiments" / "results" / "TABLE_IV_main_results.csv"
+RESULTS = ROOT / "experiments" / "results" / "TABLE_III_main_results.csv"
 CONFIG = ROOT / "experiments" / "configs" / "main_60ep.yaml"
 
 EXPECTED_MEAN = {
-    "eer_pct": 3.75,
-    "auc": 0.9928,
+    "eer_pct": 3.76,
+    "auc": 0.9931,
     "crr_pct": 86.95,
 }
 
 EXPECTED_STD = {
-    "eer_pct": 0.20,
-    "auc": 0.0008,
+    "eer_pct": 0.21,
+    "auc": 0.0007,
     "crr_pct": 0.40,
 }
 
@@ -63,7 +63,7 @@ def read_summary_rows() -> dict[str, dict[str, float]]:
 def verify_results() -> None:
     summary = read_summary_rows()
     if "mean" not in summary or "std" not in summary:
-        raise AssertionError("TABLE_IV_main_results.csv must contain mean and std rows.")
+        raise AssertionError("TABLE_III_main_results.csv must contain mean and std rows.")
 
     for metric, expected in EXPECTED_MEAN.items():
         actual = summary["mean"][metric]
@@ -86,7 +86,7 @@ def verify_protocol_and_config() -> None:
 def main() -> None:
     verify_results()
     verify_protocol_and_config()
-    print("Paper table alignment verified for v11: EER, AUC, CRR, B2T protocol, seeds, and training hyperparameters match.")
+    print("Submitted paper alignment verified: Table III EER, AUC, CRR, B2T protocol, seeds, and training hyperparameters match.")
     print("For raw NVIDIA evidence and rerun tolerance checks, run: python scripts/verify_reproducibility.py")
 
 
