@@ -1,6 +1,6 @@
-# v11 Paper Implementation Map
+# Submitted Paper Implementation Map
 
-This map shows where each major implementation/evidence area of the v11 paper belongs in the repository. It is intended for reviewers who need to connect the manuscript claims to code and result files.
+This map shows where each major implementation/evidence area of the submitted IEEE TIFS paper belongs in the repository. It is intended for reviewers who need to connect the manuscript claims to code and result files.
 
 ## Main B2T Model
 
@@ -9,7 +9,8 @@ This map shows where each major implementation/evidence area of the v11 paper be
 | DOMCS-EEG model definition | `scripts/train_60ep.py`, `scripts/core_framework.py`, `domcs_eeg/model.py` |
 | Main 60-epoch training pipeline | `scripts/train_60ep.py` |
 | Main configuration | `experiments/configs/main_60ep.yaml` |
-| Main paper table | `experiments/results/TABLE_IV_main_results.csv` |
+| Submitted main paper table | `experiments/results/TABLE_III_main_results.csv` |
+| Backward-compatible table alias | `experiments/results/TABLE_IV_main_results.csv` |
 | Paper result lock | `experiments/results/PAPER_RESULTS_LOCK.csv` |
 | Original raw NVIDIA evidence | `results/main_results/original_20260406_multi_seed_summary.csv` |
 | Independent NVIDIA rerun evidence | `results/main_results/rerun_20260428_multi_seed_summary.csv` |
@@ -43,11 +44,11 @@ This map shows where each major implementation/evidence area of the v11 paper be
 python scripts/verify_reproducibility.py
 ```
 
-This verifies the v11 paper table, the corrected hyperparameter configuration, the original NVIDIA A100 evidence, and the independent NVIDIA rerun evidence.
+This verifies the submitted paper table, the corrected hyperparameter configuration, the original NVIDIA A100 evidence, and the independent NVIDIA rerun evidence.
 
-## What Should Not Be Used as the Main Table IV Source
+## What Should Not Be Used as the Main Table III Source
 
-The following are useful historical or diagnostic artifacts, but they should not replace the 5-seed 60-epoch B2T Table IV source:
+The following are useful historical or diagnostic artifacts, but they should not replace the 5-seed 60-epoch B2T submitted Table III source:
 
 | Artifact Type | Reason |
 |---|---|
@@ -58,4 +59,4 @@ The following are useful historical or diagnostic artifacts, but they should not
 
 ## Ethical Reproducibility Statement
 
-This repository supports statistical reproducibility. It preserves the paper table, the original NVIDIA A100 run, and an independent NVIDIA A100 rerun. It does not claim that every GPU rerun will be bit-identical to the manuscript table.
+This repository supports statistical reproducibility. It preserves the submitted paper table, the original NVIDIA A100 run, and an independent NVIDIA A100 rerun. It does not claim that every GPU rerun will be bit-identical to the manuscript table.
