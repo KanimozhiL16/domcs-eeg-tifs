@@ -1,0 +1,5 @@
+source,model,eer_pct,auc,crr_pct
+submitted_paper_table_viii,EEGNet,30.25,0.764,24.14
+submitted_paper_table_viii,DeepConvNet,24.45,0.828,37.10
+submitted_paper_table_viii,CNN+ArcFace,26.03,0.822,37.86
+submitted_paper_table_viii,DOMCS-EEG,22.93,0.846,42.85

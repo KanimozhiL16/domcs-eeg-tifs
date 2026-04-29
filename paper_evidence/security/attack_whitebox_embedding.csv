@@ -1,0 +1,4 @@
+Model,alpha_success,ASR_%,Emb_Gap,Threshold_tau
+E1-ArcFace,0.0787,100.0,0.7320,0.2489
+E2-ArcFace+Orth,0.0787,100.0,0.7309,0.2500
+E3-DOMCS-EEG,0.1730,100.0,0.7057,0.4579

@@ -1,0 +1,3 @@
+source,model,eer_pct,eer_std_pct,task_leakage_pct,mean_abs_cos_zid_zstate,silhouette,ari,identity_diag,identity_offdiag,binary_state_acc_pct,notes
+submitted_paper_table_iv,ArcFace-only E1,3.94,0.31,92.48,0.4831,,,,,,Baseline representation before disentanglement.
+submitted_paper_table_iv,DOMCS-EEG E5,3.76,0.21,52.90,0.1079,-0.010,0.002,0.881,0.058,43.8,Disentangled identity representation reported in submitted manuscript.

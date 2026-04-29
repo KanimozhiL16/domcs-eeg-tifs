@@ -1,0 +1,17 @@
+source,item,value,unit,notes
+submitted_paper,dataset_subjects,109,subjects,EEGMMIDB subject count after preprocessing.
+submitted_paper,total_windows,173198,windows,2 s windows at 128 Hz with 1 s step.
+submitted_paper,enrollment_windows,13075,windows,Baseline enrollment split.
+submitted_paper,verification_windows,160123,windows,Task verification split.
+submitted_paper,sampling_rate,128,Hz,Preprocessed sampling rate.
+submitted_paper,window_length,2,s,Window duration.
+submitted_paper,window_step,1,s,Window stride.
+submitted_paper,prototype_k,3,count,Selected prototype count.
+submitted_paper,prototype_elbow_silhouette,0.312,score,Prototype elbow/silhouette evidence.
+submitted_paper,mcnemar_chi2,315.3,statistic,McNemar test statistic.
+submitted_paper,mcnemar_p,1.53e-70,p_value,McNemar significance.
+submitted_paper,session_drift_pearson_r,-0.991,correlation,Session drift correlation.
+submitted_paper,session_drift_r2,0.983,r_squared,Session drift fit.
+submitted_paper,session_drift_friedman_chi2,33.0,statistic,Friedman test statistic.
+submitted_paper,session_drift_friedman_p,5.26e-4,p_value,Friedman significance.
+submitted_paper,model_params_domcs,310000,parameters,Approximate DOMCS-EEG parameter count reported in manuscript.

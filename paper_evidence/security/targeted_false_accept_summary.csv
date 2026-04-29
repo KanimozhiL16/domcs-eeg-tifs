@@ -1,0 +1,2 @@
+attack,epsilon,alpha,steps,threshold,targeted_success_rate,targeted_far,mean_score_before,mean_score_after,score_rise,n_completed_targets
+TARGETED_FALSE_ACCEPT,0.005,0.002,7,0.4666089713573456,0.12774305555555557,0.12774305555555557,0.16833298523561097,0.2563966724852152,0.08806368727236986,30
