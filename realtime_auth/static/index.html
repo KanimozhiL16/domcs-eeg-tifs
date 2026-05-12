@@ -3,115 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DOMCS-EEG Authentication</title>
+  <title>DOMCS-EEG 109-Subject Demo</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
   <main class="shell">
-    <section class="hero">
+    <header class="topbar">
       <div>
-        <p class="eyebrow">DOMCS-EEG Real-Time Software</p>
-        <h1>Enroll. Verify. Reject Unknowns.</h1>
-        <p class="subtext">Choose one of three modes: pre-windowed arrays, master NPZ subject/run slicing, or raw EDF preprocessing.</p>
+        <p class="eyebrow">DOMCS-EEG supervisor demo</p>
+        <h1>109-subject EEG biometric authentication</h1>
+        <p class="subtext">Preprocessed EEGMMIDB NPZ is used as the local database. The neural network is already trained; this demo performs paper-aligned enrollment and verification.</p>
       </div>
-      <div class="status-card">
-        <div id="health-status">Loading system status...</div>
-      </div>
+      <div class="status" id="system-status">Loading database status...</div>
+    </header>
+
+    <section class="layout">
+      <aside class="panel">
+        <div class="panel-header">
+          <h2>Database Status</h2>
+          <button id="reload-database" type="button">Refresh</button>
+        </div>
+        <dl class="kv" id="database-details"></dl>
+      </aside>
+
+      <section class="panel">
+        <h2>Subject Browser</h2>
+        <div class="form-row">
+          <label for="enroll-subject">Enroll subject</label>
+          <select id="enroll-subject"></select>
+        </div>
+        <div id="subject-details" class="subject-details">Select a subject after database loading.</div>
+      </section>
     </section>
 
-    <section class="panel">
-      <h2>Mode 1: Pre-Windowed EEG</h2>
-      <div class="grid">
-        <form class="panel nested" id="enroll-form">
-          <h3>Enroll From .npy/.npz</h3>
-          <input name="user_id" type="text" placeholder="user_id" required>
-          <input name="eeg_file" type="file" accept=".npy,.npz" required>
-          <button type="submit">Enroll</button>
-        </form>
+    <section class="workflow">
+      <article class="panel step">
+        <div class="step-number">1</div>
+        <h2>Enroll</h2>
+        <p>Creates a biometric template from baseline runs R01-R02 for the selected subject.</p>
+        <button id="enroll-button" type="button">Enroll Selected Subject</button>
+      </article>
 
-        <form class="panel nested" id="verify-form">
-          <h3>Verify From .npy/.npz</h3>
-          <input name="user_id" type="text" placeholder="claimed_user_id" required>
-          <input name="eeg_file" type="file" accept=".npy,.npz" required>
-          <button type="submit">Verify</button>
-        </form>
-      </div>
-    </section>
+      <article class="panel step">
+        <div class="step-number">2</div>
+        <h2>Genuine Verify</h2>
+        <p>Uses task runs R03-R14 from the same subject against the enrolled template.</p>
+        <button id="genuine-button" type="button">Verify Same Subject</button>
+      </article>
 
-    <section class="panel">
-      <h2>Mode 2: Master NPZ Dataset</h2>
-      <p class="hint">Runs example: r01,r02 for enrollment and r03,r04,r05,r06 for verification.</p>
-      <div class="grid">
-        <form class="panel nested" id="inspect-master-form">
-          <h3>Inspect Master NPZ</h3>
-          <input name="master_npz" type="file" accept=".npz" required>
-          <button type="submit">Inspect</button>
-        </form>
-
-        <form class="panel nested" id="master-enroll-form">
-          <h3>Enroll From Master NPZ</h3>
-          <input name="user_id" type="text" placeholder="app_user_id" required>
-          <input name="subject_id" type="text" placeholder="subject_id e.g. 1" required>
-          <input name="runs" type="text" placeholder="r01,r02" required>
-          <input name="master_npz" type="file" accept=".npz" required>
-          <button type="submit">Enroll</button>
-        </form>
-
-        <form class="panel nested" id="master-verify-form">
-          <h3>Verify From Master NPZ</h3>
-          <input name="user_id" type="text" placeholder="claimed_user_id" required>
-          <input name="subject_id" type="text" placeholder="probe_subject_id" required>
-          <input name="runs" type="text" placeholder="r03,r04,r05,r06" required>
-          <input name="master_npz" type="file" accept=".npz" required>
-          <button type="submit">Verify</button>
-        </form>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Mode 3: Raw EDF Trials</h2>
-      <p class="hint">Upload one or more EDF files. Backend preprocessing, resampling, normalization, and windowing are automatic.</p>
-      <div class="grid">
-        <form class="panel nested" id="edf-enroll-form">
-          <h3>Enroll From EDF</h3>
-          <input name="user_id" type="text" placeholder="user_id" required>
-          <input name="eeg_files" type="file" accept=".edf" multiple required>
-          <button type="submit">Enroll</button>
-        </form>
-
-        <form class="panel nested" id="edf-verify-form">
-          <h3>Verify From EDF</h3>
-          <input name="user_id" type="text" placeholder="claimed_user_id" required>
-          <input name="eeg_files" type="file" accept=".edf" multiple required>
-          <button type="submit">Verify</button>
-        </form>
-      </div>
-    </section>
-
-    <section class="grid">
-      <form class="panel" id="identify-form">
-        <h2>Identify</h2>
-        <input name="eeg_file" type="file" accept=".npy,.npz" required>
-        <button type="submit">Identify Best Match</button>
-      </form>
-
-      <form class="panel" id="threshold-form">
-        <h2>Threshold</h2>
-        <input name="threshold" type="number" min="0" max="1" step="0.01" value="0.58" required>
-        <button type="submit">Update</button>
-      </form>
+      <article class="panel step">
+        <div class="step-number">3</div>
+        <h2>Impostor Verify</h2>
+        <p>Uses task runs R03-R14 from another subject against the enrolled identity.</p>
+        <div class="form-row">
+          <label for="impostor-subject">Probe subject</label>
+          <select id="impostor-subject"></select>
+        </div>
+        <button id="impostor-button" type="button">Verify Impostor Subject</button>
+      </article>
     </section>
 
     <section class="panel">
       <div class="panel-header">
-        <h2>Enrolled Users</h2>
-        <button id="refresh-users" type="button">Refresh</button>
+        <h2>Paper-Aligned Flow</h2>
+        <button id="reset-demo" type="button" class="secondary">Reset Enrollment Store</button>
       </div>
-      <div id="users-list" class="users-list">No users enrolled.</div>
+      <div class="flow">
+        <span>NPZ windows</span>
+        <span>R01-R02 enrollment</span>
+        <span>DOMCS-EEG embedding</span>
+        <span>Stored template</span>
+        <span>R03-R14 probe</span>
+        <span>Cosine score</span>
+        <span>Accept / reject</span>
+      </div>
     </section>
 
     <section class="panel">
-      <h2>Response</h2>
+      <h2>Evidence Log</h2>
+      <div id="evidence-log" class="evidence-log">Awaiting action...</div>
+    </section>
+
+    <section class="panel">
+      <h2>Raw Response</h2>
       <pre id="output">Awaiting action...</pre>
     </section>
   </main>

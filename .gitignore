@@ -12,3 +12,4 @@ runs/
 wandb/
 mlruns/
 runtime_store/embeddings/*.npz
+demo_outputs/

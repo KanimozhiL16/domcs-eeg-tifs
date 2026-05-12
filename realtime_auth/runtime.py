@@ -1,6 +1,9 @@
 import io
 import json
+import os
+import shutil
 import tempfile
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -10,6 +13,12 @@ import numpy as np
 import torch
 
 from domcs_eeg.model import DOMCSEEG
+
+DEFAULT_DATABASE_PATH = Path(
+    r"C:\Users\L.KANIMOZHI\Downloads\DAILY TASKS\APR 2026\21 APR 26\EEGMMIDB_win2s_step1s_fs128.npz"
+)
+ENROLL_RUNS = ("r01", "r02")
+VERIFY_RUNS = tuple(f"r{idx:02d}" for idx in range(3, 15))
 
 
 def _l2_normalize(array: np.ndarray) -> np.ndarray:
@@ -44,7 +53,14 @@ def _canon_run(value: Any) -> str:
 def _canon_subject(value: Any) -> str:
     token = str(value).strip().lower()
     digits = "".join(ch for ch in token if ch.isdigit())
-    return digits or token
+    return str(int(digits)) if digits else token
+
+
+def _sort_tokens(values: set[str] | list[str]) -> list[str]:
+    def key_fn(value: str):
+        return (0, int(value)) if str(value).isdigit() else (1, str(value))
+
+    return sorted(values, key=key_fn)
 
 
 def _split_run_list(text: str) -> list[str]:
@@ -113,6 +129,148 @@ def inspect_master_npz(payload: bytes) -> dict[str, Any]:
     }
 
 
+def _npz_member_shape(path: Path, key: str) -> list[int] | None:
+    member = f"{key}.npy"
+    try:
+        with zipfile.ZipFile(path) as archive:
+            with archive.open(member) as stream:
+                version = np.lib.format.read_magic(stream)
+                if version == (1, 0):
+                    shape, _, _ = np.lib.format.read_array_header_1_0(stream)
+                elif version == (2, 0):
+                    shape, _, _ = np.lib.format.read_array_header_2_0(stream)
+                else:
+                    shape, _, _ = np.lib.format._read_array_header(stream, version)
+                return [int(dim) for dim in shape]
+    except Exception:
+        return None
+
+
+class NpzSubjectDatabase:
+    """Server-side preprocessed EEGMMIDB database for the 109-subject demo."""
+
+    def __init__(
+        self,
+        path: Path | None = None,
+        enrollment_runs: tuple[str, ...] = ENROLL_RUNS,
+        verification_runs: tuple[str, ...] = VERIFY_RUNS,
+    ):
+        env_path = os.environ.get("DOMCS_EEG_NPZ_PATH")
+        self.path = Path(env_path) if env_path else (path or DEFAULT_DATABASE_PATH)
+        self.enrollment_runs = tuple(_canon_run(run) for run in enrollment_runs)
+        self.verification_runs = tuple(_canon_run(run) for run in verification_runs)
+        self._meta: dict[str, Any] | None = None
+
+    def exists(self) -> bool:
+        return self.path.exists()
+
+    def _archive(self):
+        if not self.exists():
+            raise FileNotFoundError(
+                "Preprocessed NPZ database not found. Set DOMCS_EEG_NPZ_PATH or place the file at "
+                f"{self.path}"
+            )
+        return np.load(self.path, allow_pickle=True)
+
+    def load_metadata(self, force: bool = False) -> dict[str, Any]:
+        if self._meta is not None and not force:
+            return self._meta
+
+        archive = self._archive()
+        x_key = next((key for key in ("X", "windows", "data", "eeg") if key in archive.files), None)
+        subject_key = next(
+            (key for key in ("subject_id", "subject", "subjects", "y", "Y", "labels") if key in archive.files),
+            None,
+        )
+        run_key = next((key for key in ("session", "sessions", "run", "runs", "trial", "trials") if key in archive.files), None)
+        if x_key is None or subject_key is None or run_key is None:
+            raise ValueError("NPZ database must contain data, subject, and session/run fields")
+
+        subjects_raw = np.asarray(archive[subject_key])
+        runs_raw = np.asarray(archive[run_key])
+        subjects = np.array([_canon_subject(value) for value in subjects_raw])
+        runs = np.array([_canon_run(value) for value in runs_raw])
+        unique_subjects = _sort_tokens(set(subjects.tolist()))
+        unique_runs = _sort_tokens(set(runs.tolist()))
+
+        subject_rows = []
+        enroll_set = set(self.enrollment_runs)
+        verify_set = set(self.verification_runs)
+        for subject_id in unique_subjects:
+            subject_mask = subjects == subject_id
+            subject_runs = _sort_tokens(set(runs[subject_mask].tolist()))
+            enrollment_count = int((subject_mask & np.isin(runs, list(enroll_set))).sum())
+            verification_count = int((subject_mask & np.isin(runs, list(verify_set))).sum())
+            subject_rows.append(
+                {
+                    "subject_id": subject_id,
+                    "runs": subject_runs,
+                    "total_windows": int(subject_mask.sum()),
+                    "enrollment_windows": enrollment_count,
+                    "verification_windows": verification_count,
+                    "ready": bool(enrollment_count > 0 and verification_count > 0),
+                }
+            )
+
+        x_shape = _npz_member_shape(self.path, x_key)
+        if x_shape is None:
+            x_shape = [int(dim) for dim in np.asarray(archive[x_key]).shape]
+        fs = archive["fs"].item() if "fs" in archive.files and np.asarray(archive["fs"]).shape == () else None
+        ch_names = [str(value) for value in np.asarray(archive["ch_names"]).tolist()] if "ch_names" in archive.files else []
+
+        self._meta = {
+            "path": str(self.path),
+            "exists": True,
+            "keys": list(archive.files),
+            "x_key": x_key,
+            "subject_key": subject_key,
+            "run_key": run_key,
+            "shape": x_shape,
+            "num_windows": int(x_shape[0]) if x_shape else None,
+            "num_subjects": len(unique_subjects),
+            "subjects": subject_rows,
+            "runs": unique_runs,
+            "enrollment_runs": list(self.enrollment_runs),
+            "verification_runs": list(self.verification_runs),
+            "fs": int(fs) if fs is not None else None,
+            "channel_count": len(ch_names) or (int(x_shape[1]) if x_shape and len(x_shape) > 1 else None),
+            "ch_names": ch_names,
+        }
+        return self._meta
+
+    def status(self) -> dict[str, Any]:
+        if not self.exists():
+            return {
+                "path": str(self.path),
+                "exists": False,
+                "error": "NPZ database file not found",
+                "enrollment_runs": list(self.enrollment_runs),
+                "verification_runs": list(self.verification_runs),
+            }
+        return self.load_metadata()
+
+    def subject_windows(self, subject_id: str, mode: str) -> tuple[np.ndarray, dict[str, Any]]:
+        meta = self.load_metadata()
+        subject_token = _canon_subject(subject_id)
+        run_list = self.enrollment_runs if mode == "enroll" else self.verification_runs
+        archive = self._archive()
+        windows = ensure_window_shape(np.asarray(archive[meta["x_key"]], dtype=np.float32))
+        subjects = np.array([_canon_subject(value) for value in np.asarray(archive[meta["subject_key"]])])
+        runs = np.array([_canon_run(value) for value in np.asarray(archive[meta["run_key"]])])
+        mask = (subjects == subject_token) & np.isin(runs, list(run_list))
+        if mask.sum() == 0:
+            raise ValueError(f"No {mode} windows found for subject {subject_id}")
+        selected = ensure_window_shape(windows[mask])
+        evidence = {
+            "subject_id": subject_token,
+            "mode": mode,
+            "runs": list(run_list),
+            "num_windows": int(selected.shape[0]),
+            "window_shape": [int(dim) for dim in selected.shape[1:]],
+        }
+        return selected, evidence
+
+
 def preprocess_edf_payloads(payloads: list[bytes], low_freq: float = 1.0, high_freq: float = 40.0) -> np.ndarray:
     all_windows = []
     for payload in payloads:
@@ -147,6 +305,7 @@ class AuthConfig:
     checkpoint_path: Path
     registry_path: Path
     embeddings_dir: Path
+    database_path: Path = DEFAULT_DATABASE_PATH
     threshold: float = 0.58
     min_windows: int = 3
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
@@ -201,11 +360,25 @@ class EnrollmentStore:
         payload = np.load(meta["storage_path"], allow_pickle=False)
         return payload["embeddings"].astype(np.float32), payload["centroid"].astype(np.float32)
 
+    def reset(self) -> None:
+        if self.embeddings_dir.exists():
+            try:
+                shutil.rmtree(self.embeddings_dir)
+            except PermissionError:
+                for child in self.embeddings_dir.glob("*.npz"):
+                    try:
+                        child.unlink()
+                    except PermissionError:
+                        pass
+        self.embeddings_dir.mkdir(parents=True, exist_ok=True)
+        self._write({"users": {}})
+
 
 class BiometricAuthenticator:
     def __init__(self, config: AuthConfig):
         self.config = config
         self.store = EnrollmentStore(config.registry_path, config.embeddings_dir)
+        self.database = NpzSubjectDatabase(config.database_path)
         self.model = DOMCSEEG.from_checkpoint(str(config.checkpoint_path), device=config.device)
 
     def _extract_embeddings(self, windows: np.ndarray) -> np.ndarray:
@@ -229,6 +402,14 @@ class BiometricAuthenticator:
             "meta": meta,
         }
 
+    def enroll_subject(self, subject_id: str, user_id: str | None = None) -> dict[str, Any]:
+        windows, evidence = self.database.subject_windows(subject_id, mode="enroll")
+        app_user_id = user_id or f"subject_{_canon_subject(subject_id)}"
+        result = self.enroll(user_id=app_user_id, windows=windows)
+        result["protocol"] = "B2T enrollment: baseline runs R01-R02"
+        result["evidence"] = evidence
+        return result
+
     def verify(self, user_id: str, windows: np.ndarray) -> dict[str, Any]:
         probe_embeddings = self._extract_embeddings(windows)
         templates, centroid = self.store.load_templates(user_id)
@@ -246,6 +427,16 @@ class BiometricAuthenticator:
             "num_probe_windows": int(probe_embeddings.shape[0]),
             "per_window_scores": per_window.round(6).tolist(),
         }
+
+    def verify_subject(self, claimed_user_id: str, probe_subject_id: str) -> dict[str, Any]:
+        windows, evidence = self.database.subject_windows(probe_subject_id, mode="verify")
+        result = self.verify(user_id=claimed_user_id, windows=windows)
+        result["claimed_user_id"] = claimed_user_id
+        result["probe_subject_id"] = _canon_subject(probe_subject_id)
+        result["protocol"] = "B2T verification: task runs R03-R14"
+        result["evidence"] = evidence
+        result["attempt_type"] = "genuine" if claimed_user_id == f"subject_{_canon_subject(probe_subject_id)}" else "impostor"
+        return result
 
     def identify(self, windows: np.ndarray) -> dict[str, Any]:
         users = self.store.list_users()

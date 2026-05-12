@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Body, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -42,14 +42,85 @@ def health():
         "status": "ok",
         "device": config.device,
         "checkpoint": str(config.checkpoint_path),
+        "checkpoint_exists": config.checkpoint_path.exists(),
         "threshold": config.threshold,
         "min_windows": config.min_windows,
+        "database_path": str(authenticator.database.path),
+        "database_exists": authenticator.database.exists(),
     }
 
 
 @app.get("/api/users")
 def list_users():
     return {"users": authenticator.store.list_users()}
+
+
+@app.get("/api/demo/database")
+def demo_database():
+    try:
+        status = authenticator.database.status()
+        status.update(
+            {
+                "device": config.device,
+                "checkpoint": str(config.checkpoint_path),
+                "checkpoint_exists": config.checkpoint_path.exists(),
+                "threshold": config.threshold,
+                "min_windows": config.min_windows,
+            }
+        )
+        return status
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get("/api/demo/subjects")
+def demo_subjects():
+    try:
+        meta = authenticator.database.load_metadata()
+        return {
+            "num_subjects": meta["num_subjects"],
+            "enrollment_runs": meta["enrollment_runs"],
+            "verification_runs": meta["verification_runs"],
+            "subjects": meta["subjects"],
+        }
+    except (FileNotFoundError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/demo/enroll")
+def demo_enroll(payload: dict = Body(...)):
+    try:
+        subject_id = str(payload.get("subject_id", "")).strip()
+        user_id = str(payload.get("user_id", "")).strip() or None
+        if not subject_id:
+            raise ValueError("subject_id is required")
+        return authenticator.enroll_subject(subject_id=subject_id, user_id=user_id)
+    except (ValueError, KeyError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/demo/verify")
+def demo_verify(payload: dict = Body(...)):
+    try:
+        claimed_user_id = str(payload.get("claimed_user_id", "")).strip()
+        probe_subject_id = str(payload.get("probe_subject_id", "")).strip()
+        if not claimed_user_id or not probe_subject_id:
+            raise ValueError("claimed_user_id and probe_subject_id are required")
+        return authenticator.verify_subject(claimed_user_id=claimed_user_id, probe_subject_id=probe_subject_id)
+    except (ValueError, KeyError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/demo/reset")
+def demo_reset():
+    authenticator.store.reset()
+    return {"status": "reset", "users": []}
 
 
 async def _read_windows(file: UploadFile):

@@ -1,8 +1,15 @@
 const output = document.getElementById("output");
-const usersList = document.getElementById("users-list");
-const healthStatus = document.getElementById("health-status");
+const evidenceLog = document.getElementById("evidence-log");
+const systemStatus = document.getElementById("system-status");
+const databaseDetails = document.getElementById("database-details");
+const enrollSubject = document.getElementById("enroll-subject");
+const impostorSubject = document.getElementById("impostor-subject");
+const subjectDetails = document.getElementById("subject-details");
 
-async function fetchJson(url, options) {
+let subjects = [];
+let enrolledUserId = null;
+
+async function fetchJson(url, options = {}) {
   const response = await fetch(url, options);
   const data = await response.json();
   if (!response.ok) {
@@ -11,74 +18,166 @@ async function fetchJson(url, options) {
   return data;
 }
 
+function setBusy(button, busy) {
+  button.disabled = busy;
+  button.dataset.originalText = button.dataset.originalText || button.textContent;
+  button.textContent = busy ? "Running..." : button.dataset.originalText;
+}
+
 function renderOutput(data) {
   output.textContent = JSON.stringify(data, null, 2);
+  output.className = "";
   if (data.decision === "accept" || data.verified === true) {
-    output.className = "accept";
+    output.classList.add("accept");
   } else if (data.decision === "reject" || data.verified === false || data.error) {
-    output.className = "reject";
-  } else {
-    output.className = "";
+    output.classList.add("reject");
   }
 }
 
-async function submitForm(formId, endpoint, onSuccess) {
-  const form = document.getElementById(formId);
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    try {
-      const data = await fetchJson(endpoint, {
-        method: "POST",
-        body: new FormData(form),
-      });
-      renderOutput(data);
-      if (onSuccess) {
-        await onSuccess(data);
-      }
-    } catch (error) {
-      renderOutput({ error: error.message });
-    }
-  });
+function appendEvidence(title, data) {
+  const row = document.createElement("div");
+  row.className = "evidence-row";
+  const decision = data.decision ? `Decision: ${data.decision.toUpperCase()}` : data.status || "Recorded";
+  const score = typeof data.score === "number" ? ` | Score: ${data.score.toFixed(4)}` : "";
+  const subject = data.evidence?.subject_id || data.probe_subject_id || "";
+  const windows = data.evidence?.num_windows || data.num_windows || data.num_probe_windows || "";
+  row.innerHTML = `
+    <strong>${title}</strong>
+    <span>${decision}${score}</span>
+    <small>Subject ${subject || "-"} | windows ${windows || "-"} | user ${data.user_id || data.claimed_user_id || "-"}</small>
+  `;
+  if (evidenceLog.textContent === "Awaiting action...") {
+    evidenceLog.textContent = "";
+  }
+  evidenceLog.prepend(row);
 }
 
-async function loadUsers() {
+function renderDatabase(meta) {
+  const loaded = meta.exists && !meta.error;
+  systemStatus.textContent = loaded
+    ? `Loaded ${meta.num_subjects} subjects | device=${meta.device} | threshold=${meta.threshold}`
+    : `Database not ready: ${meta.error || "file missing"}`;
+  systemStatus.className = loaded ? "status ok" : "status bad";
+
+  databaseDetails.innerHTML = `
+    <dt>NPZ path</dt><dd>${meta.path || "-"}</dd>
+    <dt>Subjects</dt><dd>${meta.num_subjects || 0}</dd>
+    <dt>Windows</dt><dd>${meta.num_windows || "-"}</dd>
+    <dt>Shape</dt><dd>${meta.shape ? meta.shape.join(" x ") : "-"}</dd>
+    <dt>Sampling rate</dt><dd>${meta.fs || "-"} Hz</dd>
+    <dt>Channels</dt><dd>${meta.channel_count || "-"}</dd>
+    <dt>Enrollment runs</dt><dd>${(meta.enrollment_runs || []).join(", ")}</dd>
+    <dt>Verification runs</dt><dd>${(meta.verification_runs || []).join(", ")}</dd>
+    <dt>Checkpoint</dt><dd>${meta.checkpoint_exists ? "loaded" : "missing"}</dd>
+  `;
+}
+
+function fillSubjectSelects(rows) {
+  subjects = rows || [];
+  const options = subjects.map((subject) => {
+    const label = `Subject ${subject.subject_id} - enroll ${subject.enrollment_windows}, verify ${subject.verification_windows}`;
+    return `<option value="${subject.subject_id}" ${subject.ready ? "" : "disabled"}>${label}</option>`;
+  }).join("");
+  enrollSubject.innerHTML = options;
+  impostorSubject.innerHTML = options;
+  if (subjects.length > 1) {
+    impostorSubject.selectedIndex = 1;
+  }
+  renderSubjectDetails();
+}
+
+function renderSubjectDetails() {
+  const selected = subjects.find((subject) => subject.subject_id === enrollSubject.value);
+  if (!selected) {
+    subjectDetails.textContent = "No subject selected.";
+    return;
+  }
+  subjectDetails.innerHTML = `
+    <div><strong>Subject ${selected.subject_id}</strong></div>
+    <div>Total windows: ${selected.total_windows}</div>
+    <div>Enrollment windows R01-R02: ${selected.enrollment_windows}</div>
+    <div>Verification windows R03-R14: ${selected.verification_windows}</div>
+    <div>Runs found: ${selected.runs.join(", ")}</div>
+  `;
+}
+
+async function loadDatabase() {
   try {
-    const data = await fetchJson("/api/users");
-    if (!data.users.length) {
-      usersList.textContent = "No users enrolled.";
-      return;
-    }
-    usersList.innerHTML = data.users.map((user) => `
-      <div class="user-chip">
-        <strong>${user.user_id}</strong><br>
-        windows: ${user.num_windows} | dim: ${user.embedding_dim}
-      </div>
-    `).join("");
+    const meta = await fetchJson("/api/demo/database");
+    renderDatabase(meta);
+    fillSubjectSelects(meta.subjects || []);
+    renderOutput({ database: "ready", subjects: meta.num_subjects, path: meta.path });
   } catch (error) {
-    usersList.textContent = error.message;
+    renderOutput({ error: error.message });
+    systemStatus.textContent = error.message;
+    systemStatus.className = "status bad";
   }
 }
 
-async function loadHealth() {
+async function postDemo(url, payload, button, title) {
+  setBusy(button, true);
   try {
-    const data = await fetchJson("/api/health");
-    healthStatus.textContent = `device=${data.device} | threshold=${data.threshold} | min_windows=${data.min_windows}`;
+    const data = await fetchJson(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    renderOutput(data);
+    appendEvidence(title, data);
+    return data;
   } catch (error) {
-    healthStatus.textContent = error.message;
+    const data = { error: error.message };
+    renderOutput(data);
+    appendEvidence(`${title} failed`, data);
+    return data;
+  } finally {
+    setBusy(button, false);
   }
 }
 
-document.getElementById("refresh-users").addEventListener("click", loadUsers);
+document.getElementById("reload-database").addEventListener("click", loadDatabase);
+enrollSubject.addEventListener("change", () => {
+  enrolledUserId = null;
+  renderSubjectDetails();
+});
 
-submitForm("enroll-form", "/api/enroll", loadUsers);
-submitForm("verify-form", "/api/verify");
-submitForm("identify-form", "/api/identify");
-submitForm("threshold-form", "/api/settings/threshold", loadHealth);
-submitForm("inspect-master-form", "/api/master/inspect");
-submitForm("master-enroll-form", "/api/master/enroll", loadUsers);
-submitForm("master-verify-form", "/api/master/verify");
-submitForm("edf-enroll-form", "/api/edf/enroll", loadUsers);
-submitForm("edf-verify-form", "/api/edf/verify");
+document.getElementById("enroll-button").addEventListener("click", async (event) => {
+  const subjectId = enrollSubject.value;
+  enrolledUserId = `subject_${subjectId}`;
+  await postDemo(
+    "/api/demo/enroll",
+    { subject_id: subjectId, user_id: enrolledUserId },
+    event.currentTarget,
+    `Enrolled subject ${subjectId}`
+  );
+});
 
-loadUsers();
-loadHealth();
+document.getElementById("genuine-button").addEventListener("click", async (event) => {
+  const subjectId = enrollSubject.value;
+  const userId = enrolledUserId || `subject_${subjectId}`;
+  await postDemo(
+    "/api/demo/verify",
+    { claimed_user_id: userId, probe_subject_id: subjectId },
+    event.currentTarget,
+    `Genuine verification for subject ${subjectId}`
+  );
+});
+
+document.getElementById("impostor-button").addEventListener("click", async (event) => {
+  const subjectId = enrollSubject.value;
+  const probeId = impostorSubject.value;
+  const userId = enrolledUserId || `subject_${subjectId}`;
+  await postDemo(
+    "/api/demo/verify",
+    { claimed_user_id: userId, probe_subject_id: probeId },
+    event.currentTarget,
+    `Impostor verification: subject ${probeId} against ${subjectId}`
+  );
+});
+
+document.getElementById("reset-demo").addEventListener("click", async (event) => {
+  await postDemo("/api/demo/reset", {}, event.currentTarget, "Reset enrollment store");
+  enrolledUserId = null;
+});
+
+loadDatabase();
