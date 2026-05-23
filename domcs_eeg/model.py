@@ -1,4 +1,6 @@
-import torch
+# DOMCSEEG is the public inference API equivalent of EEGDiSentangle
+# defined in scripts/train_60ep.py. Architecturally identical;
+# renamed for clarity in the public reproducibility release.import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
