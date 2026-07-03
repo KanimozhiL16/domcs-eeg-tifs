@@ -1,4 +1,4 @@
-<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/36ccf9c8-93c7-4f01-9fb8-a2595252ac19" /># DOMCS-EEG
+# DOMCS-EEG
 
 Reproducibility package for **Domain-Orthogonal Multi-Component Disentanglement for Cross-State EEG (DOMCS-EEG)**, an EEG biometric verification framework evaluated under a strict Baseline-to-Task (B2T) protocol.
 
