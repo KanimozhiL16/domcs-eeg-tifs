@@ -1,6 +1,6 @@
-# DOMCS-EEG
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/36ccf9c8-93c7-4f01-9fb8-a2595252ac19" /># DOMCS-EEG
 
-Reproducibility package for **Domain-Orthogonal Multi-Component Supervised EEG (DOMCS-EEG)**, an EEG biometric verification framework evaluated under a strict Baseline-to-Task (B2T) protocol.
+Reproducibility package for **Domain-Orthogonal Multi-Component Disentanglement for Cross-State EEG (DOMCS-EEG)**, an EEG biometric verification framework evaluated under a strict Baseline-to-Task (B2T) protocol.
 
 This repository is the code URL cited in the submitted IEEE TIFS manuscript:
 
@@ -194,7 +194,7 @@ The `realtime_auth/` module provides a path for a live EEG biometric demo:
 
 ```bibtex
 @article{kanimozhi2026domcs,
-  title={DOMCS-EEG: Domain-Orthogonal Multi-Component Supervised EEG for Robust Cross-Task Biometric Verification},
+  title={DOMCS-EEG: Domain-Orthogonal Multi-Component Disentanglement for Cross-State EEG  for Robust Cross-Task Biometric Verification},
   author={Kanimozhi, L. and Shridevi, S.},
   journal={IEEE Transactions on Information Forensics and Security},
   year={2026}
